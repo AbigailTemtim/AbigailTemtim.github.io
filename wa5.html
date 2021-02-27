@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+        body {background-color:rgba(255, 255, 255, 0.5);}
+        h1 {color: rgba(28, 52, 116, 0.664);}
+        h2 {color:rgb(106, 144, 214)}
+        h3 {color:dimgray}
+        p  {color: rgba(0, 0, 0, 0.685)}
+        </style>
+        <script>
+            function show(show,hidden) {
+                document.getElementById(shown).style.display="block";
+                document.getElementById(hidden).style.display="none";
+                return false;
+            }
+        </script>
+        </head>
+        <body>
+            <div id="Home Page">
+                content of Home Page
+                <a href= "#" onclick= "return show('About Me/Resume','Home Page');">Show About Me/Resume</a>
+            </div>
+            <div id="About Me/Resume"> style="display:none">
+                content of page 2
+                <a href= "#" onclick= "return show('Home Page','About Me/Resume');">Show Home Page</a>
+            </div>
+
+        </body>
+        
+    
+    
+                
+
+</html>
