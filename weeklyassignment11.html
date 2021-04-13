@@ -12,6 +12,11 @@
 
 		<!-- Theme used for syntax highlighted code -->
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/plugin/highlight/monokai.min.css" id="highlight-theme">
+
+		<!-- Loading Vega-->
+		<script src="https://cdn.jsdelivr.net/npm/vega@5.19.1"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vega-lite@5.0.0"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vega-embed@6.15.1"></script>
 	</head>
 
 	<style type="text/css">
@@ -24,5 +29,300 @@
             font-size:100%;
         }
     </style>
+
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-auto-animate>
+					<h3 class="fragment highlight-pink"> Weekly Assignment 11</h3>
+					<p style="color:#725712; font-weight:bold;">Abigail Temtim</p>
+				</section>
+
+				<section>
+					<h3>Altair/Vega visualization 1</h3>
+					<p style="color:#725712; font-weight:bold;"> Here is the first visualization</p>
+					<div id="vis"></div>
+					<script type="text/javascript">
+					var spec = 
+					{
+						"$schema": "https://vega.github.io/schema/vega/v5.json",
+						"description": "A population pyramid showing U.S. demographics from 1850 to 2000.",
+						"height": 400,
+						"padding": 5,
+
+						"signals": [
+							{ "name": "chartWidth", "value": 300 },
+							{ "name": "chartPad", "value": 20 },
+							{ "name": "width", "update": "2 * chartWidth + chartPad" },
+							{ "name": "year", "value": 2000,
+							"bind": {"input": "range", "min": 1850, "max": 2000, "step": 10} }
+						],
+
+						"data": [
+							{
+							"name": "population",
+							"url": "data/population.json"
+							},
+							{
+							"name": "popYear",
+							"source": "population",
+							"transform": [
+								{"type": "filter", "expr": "datum.year == year"}
+							]
+							},
+							{
+							"name": "males",
+							"source": "popYear",
+							"transform": [
+								{"type": "filter", "expr": "datum.sex == 1"}
+							]
+							},
+							{
+							"name": "females",
+							"source": "popYear",
+							"transform": [
+								{"type": "filter", "expr": "datum.sex == 2"}
+							]
+							},
+							{
+							"name": "ageGroups",
+							"source": "population",
+							"transform": [
+								{ "type": "aggregate", "groupby": ["age"] }
+							]
+							}
+						],
+
+						"scales": [
+							{
+							"name": "y",
+							"type": "band",
+							"range": [{"signal": "height"}, 0],
+							"round": true,
+							"domain": {"data": "ageGroups", "field": "age"}
+							},
+							{
+							"name": "c",
+							"type": "ordinal",
+							"domain": [1, 2],
+							"range": ["#d5855a", "#6c4e97"]
+							}
+						],
+
+						"marks": [
+							{
+							"type": "text",
+							"interactive": false,
+							"from": {"data": "ageGroups"},
+							"encode": {
+								"enter": {
+								"x": {"signal": "chartWidth + chartPad / 2"},
+								"y": {"scale": "y", "field": "age", "band": 0.5},
+								"text": {"field": "age"},
+								"baseline": {"value": "middle"},
+								"align": {"value": "center"},
+								"fill": {"value": "#000"}
+								}
+							}
+							},
+							{
+							"type": "group",
+
+							"encode": {
+								"update": {
+								"x": {"value": 0},
+								"height": {"signal": "height"}
+								}
+							},
+
+							"scales": [
+								{
+								"name": "x",
+								"type": "linear",
+								"range": [{"signal": "chartWidth"}, 0],
+								"nice": true, "zero": true,
+								"domain": {"data": "population", "field": "people"}
+								}
+							],
+
+							"axes": [
+								{"orient": "bottom", "scale": "x", "format": "s", "title": "Females"}
+							],
+
+							"marks": [
+								{
+								"type": "rect",
+								"from": {"data": "females"},
+								"encode": {
+									"enter": {
+									"x": {"scale": "x", "field": "people"},
+									"x2": {"scale": "x", "value": 0},
+									"y": {"scale": "y", "field": "age"},
+									"height": {"scale": "y", "band": 1, "offset": -1},
+									"fillOpacity": {"value": 0.6},
+									"fill": {"scale": "c", "field": "sex"}
+									}
+								}
+								}
+							]
+							},
+							{
+							"type": "group",
+
+							"encode": {
+								"update": {
+								"x": {"signal": "chartWidth + chartPad"},
+								"height": {"signal": "height"}
+								}
+							},
+
+							"scales": [
+								{
+								"name": "x",
+								"type": "linear",
+								"range": [0, {"signal": "chartWidth"}],
+								"nice": true, "zero": true,
+								"domain": {"data": "population", "field": "people"}
+								}
+							],
+
+							"axes": [
+								{"orient": "bottom", "scale": "x", "format": "s", "title": "Males"}
+							],
+
+							"marks": [
+								{
+								"type": "rect",
+								"from": {"data": "males"},
+								"encode": {
+									"enter": {
+									"x": {"scale": "x", "field": "people"},
+									"x2": {"scale": "x", "value": 0},
+									"y": {"scale": "y", "field": "age"},
+									"height": {"scale": "y", "band": 1, "offset": -1},
+									"fillOpacity": {"value": 0.6},
+									"fill": {"scale": "c", "field": "sex"}
+									}
+								}
+								}
+							]
+							}
+						]
+						}
+						/* JSON dump of your chart's spec */
+						var opt = {"renderer": "canvas", "actions": false};  /* Options for the embedding */
+								vegaEmbed("#vis", spec, opt);
+
+					</script>
+				</section>
+
+				<section>
+					<h3>Code block descriptions 1</h3>
+					<p style="color:#725712; font-weight:bold;"></p>
+				</section>
+				<section>
+					<h3>Interpretation of visualization 1</h3>
+					<p style="color:#725712; font-weight:bold;"></p>
+				</section>
+
+
+				<section>
+					<h3>Altair/Vega visualization 2</h3>
+					<p style="color:#725712; font-weight:bold;"></p>
+				</section>
+
+				<section>
+					<h3>Code block descriptions 2</h3>
+					<p style="color:#725712; font-weight:bold;"></p>
+				</section>
+
+				<section>
+					<h3>Interpretation of visualization 2</h3>
+					<p style="color:#725712; font-weight:bold;"></p>
+				</section>
+
+				
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+				<!-- Start of a vertical slide -->
+				<section>
+					<section>
+						<h3> Themes</h3>
+						<p>The resource I used to gain more understanding on how to implement different themes is linked right below. Themes help with setting a tone for your personalnilation of your code, work, art, presentation. It helps to speak what you want others to understand about your work.</p>
+						<p><a href="https://revealjs.com/themes/">revealjs.com/themes/</a></p>
+					</section>
+
+					<section>
+						<h3> You can choose one of the themes</h3>
+						<p> If you decide to use a theme that is included, the framework comes a with a vairety!</p>
+						<img src="revealjsthemes.jpg" alt="Themes available">
+						<p> Themes make things more peronsonalised and it allows you to display your work accordingly.</p>
+						
+					</section>
+
+					<section>
+						<h3> You can also create one!</h3>
+						<p>If you want to create one </p>
+						<ul>
+							<li><b>1</b>: From reveal.js I am picking up that Themes are written in Sass</li>
+							<li><b>2</b>: In order to move forward you will need to install reveal.js development environment.</li>
+							<li><b>3</b>: Your Start by duplicating one of the built in themes (.scss version)</li>
+							<li><b>4</b>: Override the default theme</li>
+							<li><b>5</b>: For more information on the details I have linked the source below</li>
+							<li><a href="https://github.com/hakimel/reveal.js/blob/master/css/theme/README.md">Link</a></li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<h3 class="fragment highlight-pink">Conclusion</h3>
+					<p style="color:#725712; font-weight:bold;">There is plenty of things Reveal.js introduces us to. It has many features for any slide preperation.</p>
+				</section>
+
+
+
+
+
+
+
+
+
+
+					
+
+			</div>
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/reveal.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/plugin/notes/notes.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/plugin/highlight/highlight.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/plugin/math/math.min.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+				slideNumber: 'h/v',
+				
+			});
+		</script>
+	</body>
 
 </html>
