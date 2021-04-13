@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>Homework10</title>
+		<title> Assignment 11 </title>
 
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/reset.min.css">
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/reveal.min.css">
@@ -218,11 +218,11 @@
 
 				<section>
 					<h3>Code block descriptions 1</h3>
-					<p style="color:#725712; font-weight:bold;"></p>
+					<p style="color:#725712; font-weight:bold;"> Here is a link to the <a href="https://vega.github.io/vega/examples/population-pyramid/"> dataset.</a></p>
 				</section>
 				<section>
 					<h3>Interpretation of visualization 1</h3>
-					<p style="color:#725712; font-weight:bold;"></p>
+					<p style="color:#725712; font-weight:bold;"> This dataset is showing the distrbution of age between male and females in the U.S in the past 150 years. </p>
 				</section>
 
 
@@ -231,127 +231,178 @@
 					<p style="color:#725712; font-weight:bold;"> Here is the second visualization</p>
 					<div id="vis"></div>
 					<script type="text/javascript">
-					var spec = {
+					var spec = 
+					{
 						"$schema": "https://vega.github.io/schema/vega/v5.json",
-						"description": "A basic grouped bar chart example.",
-						"width": 300,
-						"height": 240,
+						"description": "A searchable, stacked area chart of U.S. occupations from 1850 to 2000.",
+						"width": 800,
+						"height": 500,
 						"padding": 5,
+
+						"signals": [
+							{
+							"name": "sex", "value": "all",
+							"bind": {"input": "radio", "options": ["men", "women", "all"]}
+							},
+							{
+							"name": "query", "value": "",
+							"on": [
+								{"events": "area:click!", "update": "datum.job"},
+								{"events": "dblclick!", "update": "''"}
+							],
+							"bind": {"input": "text", "placeholder": "search", "autocomplete": "off"}
+							}
+						],
 
 						"data": [
 							{
-							"name": "table",
-							"values": [
-								{"category":"A", "position":0, "value":0.1},
-								{"category":"A", "position":1, "value":0.6},
-								{"category":"A", "position":2, "value":0.9},
-								{"category":"A", "position":3, "value":0.4},
-								{"category":"B", "position":0, "value":0.7},
-								{"category":"B", "position":1, "value":0.2},
-								{"category":"B", "position":2, "value":1.1},
-								{"category":"B", "position":3, "value":0.8},
-								{"category":"C", "position":0, "value":0.6},
-								{"category":"C", "position":1, "value":0.1},
-								{"category":"C", "position":2, "value":0.2},
-								{"category":"C", "position":3, "value":0.7}
+							"name": "jobs",
+							"url": "data/jobs.json",
+							"transform": [
+								{
+								"type": "filter",
+								"expr": "(sex === 'all' || datum.sex === sex) && (!query || test(regexp(query,'i'), datum.job))"
+								},
+								{
+								"type": "stack",
+								"field": "perc",
+								"groupby": ["year"],
+								"sort": {
+									"field": ["job", "sex"],
+									"order": ["descending", "descending"]
+								}
+								}
+							]
+							},
+							{
+							"name": "series",
+							"source": "jobs",
+							"transform": [
+								{
+								"type": "aggregate",
+								"groupby": ["job", "sex"],
+								"fields": ["perc", "perc"],
+								"ops": ["sum", "argmax"],
+								"as": ["sum", "argmax"]
+								}
 							]
 							}
 						],
 
 						"scales": [
 							{
-							"name": "yscale",
-							"type": "band",
-							"domain": {"data": "table", "field": "category"},
-							"range": "height",
-							"padding": 0.2
+							"name": "x",
+							"type": "linear",
+							"range": "width",
+							"zero": false, "round": true,
+							"domain": {"data": "jobs", "field": "year"}
 							},
 							{
-							"name": "xscale",
+							"name": "y",
 							"type": "linear",
-							"domain": {"data": "table", "field": "value"},
-							"range": "width",
-							"round": true,
-							"zero": true,
-							"nice": true
+							"range": "height", "round": true, "zero": true,
+							"domain": {"data": "jobs", "field": "y1"}
 							},
 							{
 							"name": "color",
 							"type": "ordinal",
-							"domain": {"data": "table", "field": "position"},
-							"range": {"scheme": "category20"}
+							"domain": ["men", "women"],
+							"range": ["#33f", "#f33"]
+							},
+							{
+							"name": "alpha",
+							"type": "linear", "zero": true,
+							"domain": {"data": "series", "field": "sum"},
+							"range": [0.4, 0.8]
+							},
+							{
+							"name": "font",
+							"type": "sqrt",
+							"range": [0, 20], "round": true, "zero": true,
+							"domain": {"data": "series", "field": "argmax.perc"}
+							},
+							{
+							"name": "opacity",
+							"type": "quantile",
+							"range": [0, 0, 0, 0, 0, 0.1, 0.2, 0.4, 0.7, 1.0],
+							"domain": {"data": "series", "field": "argmax.perc"}
+							},
+							{
+							"name": "align",
+							"type": "quantize",
+							"range": ["left", "center", "right"], "zero": false,
+							"domain": [1730, 2130]
+							},
+							{
+							"name": "offset",
+							"type": "quantize",
+							"range": [6, 0, -6], "zero": false,
+							"domain": [1730, 2130]
 							}
 						],
 
 						"axes": [
-							{"orient": "left", "scale": "yscale", "tickSize": 0, "labelPadding": 4, "zindex": 1},
-							{"orient": "bottom", "scale": "xscale"}
+							{
+							"orient": "bottom", "scale": "x", "format": "d", "tickCount": 15
+							},
+							{
+							"orient": "right", "scale": "y", "format": "%",
+							"grid": true, "domain": false, "tickSize": 12,
+							"encode": {
+								"grid": {"enter": {"stroke": {"value": "#ccc"}}},
+								"ticks": {"enter": {"stroke": {"value": "#ccc"}}}
+							}
+							}
 						],
 
 						"marks": [
 							{
 							"type": "group",
-
 							"from": {
+								"data": "series",
 								"facet": {
-								"data": "table",
 								"name": "facet",
-								"groupby": "category"
+								"data": "jobs",
+								"groupby": ["job", "sex"]
 								}
 							},
-
-							"encode": {
-								"enter": {
-								"y": {"scale": "yscale", "field": "category"}
-								}
-							},
-
-							"signals": [
-								{"name": "height", "update": "bandwidth('yscale')"}
-							],
-
-							"scales": [
-								{
-								"name": "pos",
-								"type": "band",
-								"range": "height",
-								"domain": {"data": "facet", "field": "position"}
-								}
-							],
 
 							"marks": [
 								{
-								"name": "bars",
+								"type": "area",
 								"from": {"data": "facet"},
-								"type": "rect",
 								"encode": {
-									"enter": {
-									"y": {"scale": "pos", "field": "position"},
-									"height": {"scale": "pos", "band": 1},
-									"x": {"scale": "xscale", "field": "value"},
-									"x2": {"scale": "xscale", "value": 0},
-									"fill": {"scale": "color", "field": "position"}
-									}
-								}
-								},
-								{
-								"type": "text",
-								"from": {"data": "bars"},
-								"encode": {
-									"enter": {
-									"x": {"field": "x2", "offset": -5},
-									"y": {"field": "y", "offset": {"field": "height", "mult": 0.5}},
-									"fill": [
-										{"test": "contrast('white', datum.fill) > contrast('black', datum.fill)", "value": "white"},
-										{"value": "black"}
-									],
-									"align": {"value": "right"},
-									"baseline": {"value": "middle"},
-									"text": {"field": "datum.value"}
+									"update": {
+									"x": {"scale": "x", "field": "year"},
+									"y": {"scale": "y", "field": "y0"},
+									"y2": {"scale": "y", "field": "y1"},
+									"fill": {"scale": "color", "field": "sex"},
+									"fillOpacity": {"scale": "alpha", "field": {"parent": "sum"}}
+									},
+									"hover": {
+									"fillOpacity": {"value": 0.2}
 									}
 								}
 								}
 							]
+							},
+							{
+							"type": "text",
+							"from": {"data": "series"},
+							"interactive": false,
+							"encode": {
+								"update": {
+								"x": {"scale": "x", "field": "argmax.year"},
+								"dx": {"scale": "offset", "field": "argmax.year"},
+								"y": {"signal": "scale('y', 0.5 * (datum.argmax.y0 + datum.argmax.y1))"},
+								"fill": {"value": "#000"},
+								"fillOpacity": {"scale": "opacity", "field": "argmax.perc"},
+								"fontSize": {"scale": "font", "field": "argmax.perc", "offset": 5},
+								"text": {"field": "job"},
+								"align": {"scale": "align", "field": "argmax.year"},
+								"baseline": {"value": "middle"}
+								}
+							}
 							}
 						]
 						}
@@ -364,78 +415,14 @@
 
 				<section>
 					<h3>Code block descriptions 2</h3>
-					<p style="color:#725712; font-weight:bold;"></p>
+					<p style="color:#725712; font-weight:bold;"> Here is the link with the <a href="https://vega.github.io/vega/examples/job-voyager/"> dataset.</a></p>
 				</section>
 
 				<section>
 					<h3>Interpretation of visualization 2</h3>
-					<p style="color:#725712; font-weight:bold;"></p>
+					<p style="color:#725712; font-weight:bold;"> This dataset is looking occupation in the U.S in the past 150 year. It is an interactive stacked graph that gives you to look at data from both genders or you get to pick what you want to look at.</p>
 				</section>
 
-				
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-				<!-- Start of a vertical slide -->
-				<section>
-					<section>
-						<h3> Themes</h3>
-						<p>The resource I used to gain more understanding on how to implement different themes is linked right below. Themes help with setting a tone for your personalnilation of your code, work, art, presentation. It helps to speak what you want others to understand about your work.</p>
-						<p><a href="https://revealjs.com/themes/">revealjs.com/themes/</a></p>
-					</section>
-
-					<section>
-						<h3> You can choose one of the themes</h3>
-						<p> If you decide to use a theme that is included, the framework comes a with a vairety!</p>
-						<img src="revealjsthemes.jpg" alt="Themes available">
-						<p> Themes make things more peronsonalised and it allows you to display your work accordingly.</p>
-						
-					</section>
-
-					<section>
-						<h3> You can also create one!</h3>
-						<p>If you want to create one </p>
-						<ul>
-							<li><b>1</b>: From reveal.js I am picking up that Themes are written in Sass</li>
-							<li><b>2</b>: In order to move forward you will need to install reveal.js development environment.</li>
-							<li><b>3</b>: Your Start by duplicating one of the built in themes (.scss version)</li>
-							<li><b>4</b>: Override the default theme</li>
-							<li><b>5</b>: For more information on the details I have linked the source below</li>
-							<li><a href="https://github.com/hakimel/reveal.js/blob/master/css/theme/README.md">Link</a></li>
-						</ul>
-					</section>
-				</section>
-
-				<section>
-					<h3 class="fragment highlight-pink">Conclusion</h3>
-					<p style="color:#725712; font-weight:bold;">There is plenty of things Reveal.js introduces us to. It has many features for any slide preperation.</p>
-				</section>
-
-
-
-
-
-
-
-
-
-
-					
 
 			</div>
 		</div>
