@@ -1,0 +1,637 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title> Assignment 11 </title>
+
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/reset.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/reveal.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/theme/beige.min.css" id="theme">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/plugin/highlight/monokai.min.css" id="highlight-theme">
+
+		<!-- Loading Vega-->
+		<script src="https://cdn.jsdelivr.net/npm/vega@5.19.1"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vega-lite@5.0.0"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vega-embed@6.15.1"></script>
+	</head>
+
+	<style type="text/css">
+        .centerOperation
+        {
+            text-align: center;
+        }
+        .paragraphFontSize
+        {
+            font-size:100%;
+        }
+    </style>
+
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-auto-animate>
+					<h3 class="fragment highlight-pink"> Weekly Assignment 11</h3>
+					<p style="color:#725712; font-weight:bold;">Abigail Temtim</p>
+				</section>
+
+				<section>
+					<h3>Altair/Vega visualization 1</h3>
+					<p style="color:#725712; font-weight:bold;"> Here is the first visualization</p>
+					<div id="vis"></div>
+					<script type="text/javascript">
+					var spec = 
+					{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "width": 400,
+  "height": 200,
+  "padding": 5,
+
+  "data": [
+    {
+      "name": "table",
+      "values": [
+        {"category": "A", "amount": 28},
+        {"category": "B", "amount": 55},
+        {"category": "C", "amount": 43},
+        {"category": "D", "amount": 91},
+        {"category": "E", "amount": 81},
+        {"category": "F", "amount": 53},
+        {"category": "G", "amount": 19},
+        {"category": "H", "amount": 87}
+      ]
+    }
+  ],
+
+  "signals": [
+    {
+      "name": "tooltip",
+      "value": {},
+      "on": [
+        {"events": "rect:mouseover", "update": "datum"},
+        {"events": "rect:mouseout",  "update": "{}"}
+      ]
+    }
+  ],
+
+  "scales": [
+    {
+      "name": "xscale",
+      "type": "band",
+      "domain": {"data": "table", "field": "category"},
+      "range": "width",
+      "padding": 0.05,
+      "round": true
+    },
+    {
+      "name": "yscale",
+      "domain": {"data": "table", "field": "amount"},
+      "nice": true,
+      "range": "height"
+    }
+  ],
+
+  "axes": [
+    { "orient": "bottom", "scale": "xscale" },
+    { "orient": "left", "scale": "yscale" }
+  ],
+
+  "marks": [
+    {
+      "type": "rect",
+      "from": {"data":"table"},
+      "encode": {
+        "enter": {
+          "x": {"scale": "xscale", "field": "category"},
+          "width": {"scale": "xscale", "band": 1},
+          "y": {"scale": "yscale", "field": "amount"},
+          "y2": {"scale": "yscale", "value": 0}
+        },
+        "update": {
+          "fill": {"value": "steelblue"}
+        },
+        "hover": {
+          "fill": {"value": "red"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "encode": {
+        "enter": {
+          "align": {"value": "center"},
+          "baseline": {"value": "bottom"},
+          "fill": {"value": "#333"}
+        },
+        "update": {
+          "x": {"scale": "xscale", "signal": "tooltip.category", "band": 0.5},
+          "y": {"scale": "yscale", "signal": "tooltip.amount", "offset": -2},
+          "text": {"signal": "tooltip.amount"},
+          "fillOpacity": [
+            {"test": "isNaN(tooltip.amount)", "value": 0},
+            {"value": 1}
+          ]
+        }
+      }
+    }
+  ]
+}
+						/* JSON dump of your chart's spec */
+						var opt = {"renderer": "canvas", "actions": false};  /* Options for the embedding */
+								vegaEmbed("#vis", spec, opt);
+
+					</script>
+				</section>
+
+				<section>
+					<h3>Code block descriptions 1</h3>
+					<p style="color:#725712; font-weight:bold;"> Here is a link to the dataset.<a href="https://vega.github.io/vega/examples/population-pyramid/">LINK</a></p>
+					<pre><code class='tex' data-trim>
+						{
+							"$schema": "https://vega.github.io/schema/vega/v5.json",
+							"description": "A population pyramid showing U.S. demographics from 1850 to 2000.",
+							"height": 400,
+							"padding": 5,
+						  
+							"signals": [
+							  { "name": "chartWidth", "value": 300 },
+							  { "name": "chartPad", "value": 20 },
+							  { "name": "width", "update": "2 * chartWidth + chartPad" },
+							  { "name": "year", "value": 2000,
+								"bind": {"input": "range", "min": 1850, "max": 2000, "step": 10} }
+							],
+						  
+							"data": [
+							  {
+								"name": "population",
+								"url": "data/population.json"
+							  },
+							  {
+								"name": "popYear",
+								"source": "population",
+								"transform": [
+								  {"type": "filter", "expr": "datum.year == year"}
+								]
+							  },
+							  {
+								"name": "males",
+								"source": "popYear",
+								"transform": [
+								  {"type": "filter", "expr": "datum.sex == 1"}
+								]
+							  },
+							  {
+								"name": "females",
+								"source": "popYear",
+								"transform": [
+								  {"type": "filter", "expr": "datum.sex == 2"}
+								]
+							  },
+							  {
+								"name": "ageGroups",
+								"source": "population",
+								"transform": [
+								  { "type": "aggregate", "groupby": ["age"] }
+								]
+							  }
+							],
+						  
+							"scales": [
+							  {
+								"name": "y",
+								"type": "band",
+								"range": [{"signal": "height"}, 0],
+								"round": true,
+								"domain": {"data": "ageGroups", "field": "age"}
+							  },
+							  {
+								"name": "c",
+								"type": "ordinal",
+								"domain": [1, 2],
+								"range": ["#d5855a", "#6c4e97"]
+							  }
+							],
+						  
+							"marks": [
+							  {
+								"type": "text",
+								"interactive": false,
+								"from": {"data": "ageGroups"},
+								"encode": {
+								  "enter": {
+									"x": {"signal": "chartWidth + chartPad / 2"},
+									"y": {"scale": "y", "field": "age", "band": 0.5},
+									"text": {"field": "age"},
+									"baseline": {"value": "middle"},
+									"align": {"value": "center"},
+									"fill": {"value": "#000"}
+								  }
+								}
+							  },
+							  {
+								"type": "group",
+						  
+								"encode": {
+								  "update": {
+									"x": {"value": 0},
+									"height": {"signal": "height"}
+								  }
+								},
+						  
+								"scales": [
+								  {
+									"name": "x",
+									"type": "linear",
+									"range": [{"signal": "chartWidth"}, 0],
+									"nice": true, "zero": true,
+									"domain": {"data": "population", "field": "people"}
+								  }
+								],
+						  
+								"axes": [
+								  {"orient": "bottom", "scale": "x", "format": "s", "title": "Females"}
+								],
+						  
+								"marks": [
+								  {
+									"type": "rect",
+									"from": {"data": "females"},
+									"encode": {
+									  "enter": {
+										"x": {"scale": "x", "field": "people"},
+										"x2": {"scale": "x", "value": 0},
+										"y": {"scale": "y", "field": "age"},
+										"height": {"scale": "y", "band": 1, "offset": -1},
+										"fillOpacity": {"value": 0.6},
+										"fill": {"scale": "c", "field": "sex"}
+									  }
+									}
+								  }
+								]
+							  },
+							  {
+								"type": "group",
+						  
+								"encode": {
+								  "update": {
+									"x": {"signal": "chartWidth + chartPad"},
+									"height": {"signal": "height"}
+								  }
+								},
+						  
+								"scales": [
+								  {
+									"name": "x",
+									"type": "linear",
+									"range": [0, {"signal": "chartWidth"}],
+									"nice": true, "zero": true,
+									"domain": {"data": "population", "field": "people"}
+								  }
+								],
+						  
+								"axes": [
+								  {"orient": "bottom", "scale": "x", "format": "s", "title": "Males"}
+								],
+						  
+								"marks": [
+								  {
+									"type": "rect",
+									"from": {"data": "males"},
+									"encode": {
+									  "enter": {
+										"x": {"scale": "x", "field": "people"},
+										"x2": {"scale": "x", "value": 0},
+										"y": {"scale": "y", "field": "age"},
+										"height": {"scale": "y", "band": 1, "offset": -1},
+										"fillOpacity": {"value": 0.6},
+										"fill": {"scale": "c", "field": "sex"}
+									  }
+									}
+								  }
+								]
+							  }
+							]
+						  }
+						  
+					</code></pre>
+				</section>
+				<section>
+					<h3>Interpretation of visualization 1</h3>
+					<p style="color:#725712; font-weight:bold;"> This dataset is showing the distrbution of age between male and females in the U.S in the past 150 years. </p>
+				</section>
+
+				<section>
+					<h3>Altair/Vega visualization 2</h3>
+					<p style="color:#725712; font-weight:bold;"> Here is the second visualization</p>
+					<div id="vis"></div>
+					<script type="text/javascript">
+					var spec = 
+					{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "A basic pie chart example.",
+  "width": 200,
+  "height": 200,
+  "autosize": "none",
+
+  "signals": [
+    {
+      "name": "startAngle", "value": 0,
+      "bind": {"input": "range", "min": 0, "max": 6.29, "step": 0.01}
+    },
+    {
+      "name": "endAngle", "value": 6.29,
+      "bind": {"input": "range", "min": 0, "max": 6.29, "step": 0.01}
+    },
+    {
+      "name": "padAngle", "value": 0,
+      "bind": {"input": "range", "min": 0, "max": 0.1}
+    },
+    {
+      "name": "innerRadius", "value": 0,
+      "bind": {"input": "range", "min": 0, "max": 90, "step": 1}
+    },
+    {
+      "name": "cornerRadius", "value": 0,
+      "bind": {"input": "range", "min": 0, "max": 10, "step": 0.5}
+    },
+    {
+      "name": "sort", "value": false,
+      "bind": {"input": "checkbox"}
+    }
+  ],
+
+  "data": [
+    {
+      "name": "table",
+      "values": [
+        {"id": 1, "field": 4},
+        {"id": 2, "field": 6},
+        {"id": 3, "field": 10},
+        {"id": 4, "field": 3},
+        {"id": 5, "field": 7},
+        {"id": 6, "field": 8}
+      ],
+      "transform": [
+        {
+          "type": "pie",
+          "field": "field",
+          "startAngle": {"signal": "startAngle"},
+          "endAngle": {"signal": "endAngle"},
+          "sort": {"signal": "sort"}
+        }
+      ]
+    }
+  ],
+
+  "scales": [
+    {
+      "name": "color",
+      "type": "ordinal",
+      "domain": {"data": "table", "field": "id"},
+      "range": {"scheme": "category20"}
+    }
+  ],
+
+  "marks": [
+    {
+      "type": "arc",
+      "from": {"data": "table"},
+      "encode": {
+        "enter": {
+          "fill": {"scale": "color", "field": "id"},
+          "x": {"signal": "width / 2"},
+          "y": {"signal": "height / 2"}
+        },
+        "update": {
+          "startAngle": {"field": "startAngle"},
+          "endAngle": {"field": "endAngle"},
+          "padAngle": {"signal": "padAngle"},
+          "innerRadius": {"signal": "innerRadius"},
+          "outerRadius": {"signal": "width / 2"},
+          "cornerRadius": {"signal": "cornerRadius"}
+        }
+      }
+    }
+  ]
+}
+
+
+						/* JSON dump of your chart's spec */
+						var opt = {"renderer": "canvas", "actions": false};  /* Options for the embedding */
+								vegaEmbed("#vis", spec, opt);
+
+					</script>
+				</section>
+
+
+				<section>
+					<h3>Code block descriptions 2</h3>
+					<p style="color:#725712; font-weight:bold;"> Here is the link with the dataset. <a href="https://vega.github.io/vega/examples/job-voyager/">LINK </a></p>
+					<pre><code class='tex' data-trim>
+						{
+							"$schema": "https://vega.github.io/schema/vega/v5.json",
+							"description": "A searchable, stacked area chart of U.S. occupations from 1850 to 2000.",
+							"width": 800,
+							"height": 500,
+							"padding": 5,
+						  
+							"signals": [
+							  {
+								"name": "sex", "value": "all",
+								"bind": {"input": "radio", "options": ["men", "women", "all"]}
+							  },
+							  {
+								"name": "query", "value": "",
+								"on": [
+								  {"events": "area:click!", "update": "datum.job"},
+								  {"events": "dblclick!", "update": "''"}
+								],
+								"bind": {"input": "text", "placeholder": "search", "autocomplete": "off"}
+							  }
+							],
+						  
+							"data": [
+							  {
+								"name": "jobs",
+								"url": "data/jobs.json",
+								"transform": [
+								  {
+									"type": "filter",
+									"expr": "(sex === 'all' || datum.sex === sex) && (!query || test(regexp(query,'i'), datum.job))"
+								  },
+								  {
+									"type": "stack",
+									"field": "perc",
+									"groupby": ["year"],
+									"sort": {
+									  "field": ["job", "sex"],
+									  "order": ["descending", "descending"]
+									}
+								  }
+								]
+							  },
+							  {
+								"name": "series",
+								"source": "jobs",
+								"transform": [
+								  {
+									"type": "aggregate",
+									"groupby": ["job", "sex"],
+									"fields": ["perc", "perc"],
+									"ops": ["sum", "argmax"],
+									"as": ["sum", "argmax"]
+								  }
+								]
+							  }
+							],
+						  
+							"scales": [
+							  {
+								"name": "x",
+								"type": "linear",
+								"range": "width",
+								"zero": false, "round": true,
+								"domain": {"data": "jobs", "field": "year"}
+							  },
+							  {
+								"name": "y",
+								"type": "linear",
+								"range": "height", "round": true, "zero": true,
+								"domain": {"data": "jobs", "field": "y1"}
+							  },
+							  {
+								"name": "color",
+								"type": "ordinal",
+								"domain": ["men", "women"],
+								"range": ["#33f", "#f33"]
+							  },
+							  {
+								"name": "alpha",
+								"type": "linear", "zero": true,
+								"domain": {"data": "series", "field": "sum"},
+								"range": [0.4, 0.8]
+							  },
+							  {
+								"name": "font",
+								"type": "sqrt",
+								"range": [0, 20], "round": true, "zero": true,
+								"domain": {"data": "series", "field": "argmax.perc"}
+							  },
+							  {
+								"name": "opacity",
+								"type": "quantile",
+								"range": [0, 0, 0, 0, 0, 0.1, 0.2, 0.4, 0.7, 1.0],
+								"domain": {"data": "series", "field": "argmax.perc"}
+							  },
+							  {
+								"name": "align",
+								"type": "quantize",
+								"range": ["left", "center", "right"], "zero": false,
+								"domain": [1730, 2130]
+							  },
+							  {
+								"name": "offset",
+								"type": "quantize",
+								"range": [6, 0, -6], "zero": false,
+								"domain": [1730, 2130]
+							  }
+							],
+						  
+							"axes": [
+							  {
+								"orient": "bottom", "scale": "x", "format": "d", "tickCount": 15
+							  },
+							  {
+								"orient": "right", "scale": "y", "format": "%",
+								"grid": true, "domain": false, "tickSize": 12,
+								"encode": {
+								  "grid": {"enter": {"stroke": {"value": "#ccc"}}},
+								  "ticks": {"enter": {"stroke": {"value": "#ccc"}}}
+								}
+							  }
+							],
+						  
+							"marks": [
+							  {
+								"type": "group",
+								"from": {
+								  "data": "series",
+								  "facet": {
+									"name": "facet",
+									"data": "jobs",
+									"groupby": ["job", "sex"]
+								  }
+								},
+						  
+								"marks": [
+								  {
+									"type": "area",
+									"from": {"data": "facet"},
+									"encode": {
+									  "update": {
+										"x": {"scale": "x", "field": "year"},
+										"y": {"scale": "y", "field": "y0"},
+										"y2": {"scale": "y", "field": "y1"},
+										"fill": {"scale": "color", "field": "sex"},
+										"fillOpacity": {"scale": "alpha", "field": {"parent": "sum"}}
+									  },
+									  "hover": {
+										"fillOpacity": {"value": 0.2}
+									  }
+									}
+								  }
+								]
+							  },
+							  {
+								"type": "text",
+								"from": {"data": "series"},
+								"interactive": false,
+								"encode": {
+								  "update": {
+									"x": {"scale": "x", "field": "argmax.year"},
+									"dx": {"scale": "offset", "field": "argmax.year"},
+									"y": {"signal": "scale('y', 0.5 * (datum.argmax.y0 + datum.argmax.y1))"},
+									"fill": {"value": "#000"},
+									"fillOpacity": {"scale": "opacity", "field": "argmax.perc"},
+									"fontSize": {"scale": "font", "field": "argmax.perc", "offset": 5},
+									"text": {"field": "job"},
+									"align": {"scale": "align", "field": "argmax.year"},
+									"baseline": {"value": "middle"}
+								  }
+								}
+							  }
+							]
+						  }
+						  
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Interpretation of visualization 2</h3>
+					<p style="color:#725712; font-weight:bold;"> This dataset is looking occupation in the U.S in the past 150 year. It is an interactive stacked graph that gives you to look at data from both genders or you get to pick what you want to look at.</p>
+				</section>
+
+
+			</div>
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/reveal.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/plugin/notes/notes.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/plugin/highlight/highlight.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/plugin/math/math.min.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+				slideNumber: 'h/v',
+				
+			});
+		</script>
+	</body>
+
+</html>
